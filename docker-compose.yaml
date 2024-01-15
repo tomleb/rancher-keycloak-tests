@@ -27,6 +27,9 @@ services:
     - "--web-host=0.0.0.0"
     - "--web-port=8071"
     - "--listen-port=8070"
+    # Hehhhh
+    - "--ssl-insecure"
+    network_mode: "host"
     volumes:
     # Cert is in ./mitmproxy/mitmproxy-ca-cert.pem
     # eg: curl --cacert ./mitmproxy/mitmproxy-ca-cert.pem --proxy http://localhost:8070 http://localhost:8090
