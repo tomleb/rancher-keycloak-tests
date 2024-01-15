@@ -1,0 +1,45 @@
+version: "3.0"
+
+# Ports:
+# 8090: Keycloak no TLS
+# 8091: Keycloak TLS
+# 8092: Keycloak mTLS
+
+services:
+  keycloak:
+    image: "quay.io/keycloak/keycloak:22.0.5"
+    ports:
+    - "8090:8090"
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    command:
+    - "start-dev"
+    - "--http-port=8090"
+
+  mitmproxy:
+    image: "docker.io/mitmproxy/mitmproxy:10.2.0"
+    ports:
+    - "127.0.0.1:8071:8071"
+    - "127.0.0.1:8070:8070"
+    command:
+    - "mitmweb"
+    - "--web-host=0.0.0.0"
+    - "--web-port=8071"
+    - "--listen-port=8070"
+    volumes:
+    # Cert is in ./mitmproxy/mitmproxy-ca-cert.pem
+    # eg: curl --cacert ./mitmproxy/mitmproxy-ca-cert.pem --proxy http://localhost:8070 http://localhost:8090
+    - ./mitmproxy:/home/mitmproxy/.mitmproxy
+
+  # Cert is in ./caddy_data/caddy/certificates/local/localhost/localhost.crt
+  # eg: sudo curl --cacert ./caddy_data/caddy/certificates/local/localhost/localhost.crt https://localhost:8060
+  caddy:
+    image: "docker.io/caddy:2.7.6"
+    volumes:
+    - ./caddy:/etc/caddy
+    - ./caddy_data:/data
+    - ./mtls/:/mtls/
+    ports:
+    - "127.0.0.1:8091:8091"
+    - "127.0.0.1:8092:8092"

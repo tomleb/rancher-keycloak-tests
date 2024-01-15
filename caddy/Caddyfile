@@ -1,0 +1,18 @@
+# With TLS but without mTLS
+localhost:8091 {
+  reverse_proxy keycloak:8090
+  tls internal
+}
+
+# With mTLS
+localhost:8092 {
+  reverse_proxy keycloak:8090
+  tls internal {
+    # Documentation: https://caddyserver.com/docs/caddyfile/directives/tls#client_auth
+    client_auth {
+      # require_and_verify: Require clients to present a valid certificate that is verified
+      mode require_and_verify
+      trusted_ca_cert_file /mtls/rancher.cert
+    }
+  }
+}
